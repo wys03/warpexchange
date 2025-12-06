@@ -29,5 +29,5 @@ WarpExchange是一个基于Spring Boot的交易系统，包含交易引擎、API
 4. 运行`mvn spring-boot:run`启动项目
 
 ## 贡献
-
+学习的这位老师的项目：https://github.com/michaelliao
 欢迎提交Issue和Pull Request来改进项目。
