@@ -31,3 +31,7 @@ WarpExchange是一个基于Spring Boot的交易系统，包含交易引擎、API
 ## 贡献
 学习的这位老师的项目：https://github.com/michaelliao
 欢迎提交Issue和Pull Request来改进项目。
+
+## docker
+<img width="1912" height="1076" alt="image" src="https://github.com/user-attachments/assets/fb4774fa-d8d6-40eb-9b2c-a3109095ff63" />
+
