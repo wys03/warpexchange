@@ -19,11 +19,11 @@ WarpExchange是一个基于Spring Boot的交易系统，包含交易引擎、API
 - Spring Cloud
 - Redis
 - MySQL
-- Java 8+
+- Java 17+
 
 ## 运行项目
 
-1. 安装Java 8+和Maven
+1. 安装Java 17+和Maven
 2. 启动Redis和MySQL服务
 3. 运行`mvn clean install`安装依赖
 4. 运行`mvn spring-boot:run`启动项目
