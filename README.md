@@ -3,7 +3,10 @@
 WarpExchange是一个基于Spring Boot的交易系统，包含交易引擎、API接口、用户界面等模块。
 
 ## 项目结构
-
+- **内存优先**: 100%内存交易，微秒级响应
+- **微服务设计**: 7个独立服务，易于扩展
+- **事件驱动**: 严格序列化，保证一致性
+- **异步处理**: 多线程架构，高并发支持
 - **trading-engine**: 交易引擎模块，负责处理交易逻辑
 - **trading-api**: 交易API模块，提供RESTful接口
 - **trading-sequencer**: 交易序列化模块
@@ -15,11 +18,11 @@ WarpExchange是一个基于Spring Boot的交易系统，包含交易引擎、API
 
 ## 技术栈
 
-- Spring Boot
-- Spring Cloud
-- Redis
-- MySQL
-- Java 17+
+- **后端**: Java 17 + Spring Boot 3.x
+- **前端**: Vue.js + Bootstrap 5
+- **通信**: WebSocket + Kafka
+- **缓存**: Redis + Lua脚本
+- **存储**: MySQL + 连接池
 
 ## 运行项目
 
