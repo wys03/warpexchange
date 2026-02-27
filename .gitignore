@@ -1,44 +1,35 @@
-# 编译后的类文件
+# IDE
+.idea/
+*.iml
+
+# Build artifacts
+**/target/
+*.jar
 *.class
 
-# 日志文件
-*.log
-
-# 临时文件
-*.tmp
-*.temp
-
-# IDE文件
-.idea/
-.vscode/
-*.iml
-*.ipr
-*.iws
-
-# Maven构建目录
-target/
-build/
-
-# 依赖缓存
-node_modules/
-
-# 环境配置文件
-.env
-.env.local
-.env.*.local
-
-# 系统文件
+# OS
 .DS_Store
 Thumbs.db
 
-# Java相关
-*.jar
-*.war
-*.ear
-*.zip
-*.tar.gz
-*.rar
+# Temporary files
+*.tmp
+*.log
 
-# Spring Boot相关
-application-dev.properties
-application-prod.properties
+# Docker runtime data (exclude data, keep config)
+build/docker/mysql-data/
+build/docker/mysql/logs/
+build/docker/redis/data/
+build/docker/mysql.sock
+
+# Node modules (if any)
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Cache
+.cache/

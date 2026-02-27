@@ -1,0 +1,3 @@
+com\itranswarp\exchange\TradingEngineServiceTest.class
+com\itranswarp\exchange\assets\AssetServiceTest.class
+com\itranswarp\exchange\match\MatchEngineTest.class
