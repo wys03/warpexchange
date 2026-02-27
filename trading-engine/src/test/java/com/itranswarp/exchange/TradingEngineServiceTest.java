@@ -108,8 +108,6 @@ public class TradingEngineServiceTest {
         engine.orderService = orderService;
         engine.matchEngine = matchEngine;
         engine.clearingService = clearingService;
-        // 设置测试环境标志，避免panic时调用System.exit()
-        engine.setTestEnvironment(true);
         return engine;
     }
 

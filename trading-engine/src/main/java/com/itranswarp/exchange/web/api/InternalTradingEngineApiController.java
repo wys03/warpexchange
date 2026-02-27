@@ -25,7 +25,7 @@ public class InternalTradingEngineApiController extends LoggerSupport {
     @Autowired
     OrderService orderService;
 
-        @Autowired
+    @Autowired
     AssetService assetService;
 
     @GetMapping("/{userId}/assets")

@@ -67,9 +67,6 @@ public class TradingEngineService extends LoggerSupport {
     boolean debugMode = false;
 
     boolean fatalError = false;
-    
-    // 测试环境标志，用于控制是否在panic时调用System.exit()
-    private boolean isTestEnvironment = false;
 
     @Autowired
     AssetService assetService;
@@ -366,11 +363,7 @@ public class TradingEngineService extends LoggerSupport {
     private void panic() {
         logger.error("application panic. exit now...");
         this.fatalError = true;
-        if (!isTestEnvironment) {
-            System.exit(1);
-        } else {
-            throw new RuntimeException("Application panic in test environment");
-        }
+        System.exit(1);
     }
 
     boolean transfer(TransferEvent event) {
@@ -491,11 +484,6 @@ public class TradingEngineService extends LoggerSupport {
         this.orderService.debug();
         this.matchEngine.debug();
         System.out.println("========== // trading engine ==========");
-    }
-    
-    // 设置测试环境标志，用于测试
-    public void setTestEnvironment(boolean isTest) {
-        this.isTestEnvironment = isTest;
     }
 
     void validate() {

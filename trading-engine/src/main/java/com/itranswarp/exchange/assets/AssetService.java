@@ -27,11 +27,6 @@ public class AssetService extends LoggerSupport {
         return assets.get(assetId);
     }
 
-    /**
-     * 获取用户资产
-     * @param userId
-     * @return
-     */
     public Map<AssetEnum, Asset> getAssets(Long userId) {
         Map<AssetEnum, Asset> assets = userAssets.get(userId);
         if (assets == null) {
