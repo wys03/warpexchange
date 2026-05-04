@@ -196,8 +196,10 @@ public class TradingApiController extends AbstractApiController {
 
     /**
      * Cancel an order.
+     * 取消订单。
      *
      * @param orderId The order id.
+     *                订单id
      */
     @PostMapping(value = "/orders/{orderId}/cancel", produces = "application/json")
     @ResponseBody
@@ -228,14 +230,30 @@ public class TradingApiController extends AbstractApiController {
 
     /**
      * Create a new order.
+     * 创建新订单。
+     *
+     * @param orderRequest The order request.
+     *                     订单请求
      */
     @PostMapping(value = "/orders", produces = "application/json")
     @ResponseBody
     public DeferredResult<ResponseEntity<String>> createOrder(@RequestBody OrderRequestBean orderRequest)
             throws IOException {
+        /**
+         * 1. 获取用户ID
+         */
         final Long userId = UserContext.getRequiredUserId();
+        /**
+         * 2. 验证请求数据
+         */
         orderRequest.validate();
+        /**
+         * 3. 创建唯一请求ID
+         */
         final String refId = IdUtil.generateUniqueId();
+        /**
+         * 4. 构建订单事件
+         */
         var event = new OrderRequestEvent();
         event.refId = refId;
         event.userId = userId;
@@ -244,6 +262,9 @@ public class TradingApiController extends AbstractApiController {
         event.quantity = orderRequest.quantity;
         event.createdAt = System.currentTimeMillis();
 
+        /**
+         * 5. 创建异步响应对象
+         */
         ResponseEntity<String> timeout = new ResponseEntity<>(getTimeoutJson(), HttpStatus.BAD_REQUEST);
         DeferredResult<ResponseEntity<String>> deferred = new DeferredResult<>(this.asyncTimeout, timeout);
         deferred.onTimeout(() -> {
@@ -252,6 +273,9 @@ public class TradingApiController extends AbstractApiController {
         });
         // track deferred:
         this.deferredResultMap.put(event.refId, deferred);
+        /**
+         * 6. 发送事件到消息队列
+         */
         this.sendEventService.sendMessage(event);
         return deferred;
     }

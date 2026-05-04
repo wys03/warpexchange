@@ -6,13 +6,30 @@ import com.itranswarp.exchange.enums.AssetEnum;
 
 /**
  * Transfer between users.
+ * 
+ * 转账事件
  */
-public class TransferEvent extends AbstractEvent {
+public class  TransferEvent extends AbstractEvent {
 
+    /**
+     * 转出用户ID
+     */
     public Long fromUserId;
-    public Long toUserId;
+    /**
+     * 转入用户ID
+     */
+    public Long toUserId;   
+    /**
+     * 资产类型
+     */
     public AssetEnum asset;
+    /**
+     * 转账金额
+     */
     public BigDecimal amount;
+    /**
+     * 是否足够
+     */
     public boolean sufficient;
 
     @Override

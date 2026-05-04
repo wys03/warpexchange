@@ -2,6 +2,9 @@ package com.itranswarp.exchange.redis;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -26,6 +29,9 @@ import org.springframework.stereotype.Component;
 
 import com.itranswarp.exchange.util.ClassPathUtil;
 
+/**
+ * Redis服务
+ */
 @Component
 public class RedisService {
 
@@ -35,7 +41,23 @@ public class RedisService {
 
     final GenericObjectPool<StatefulRedisConnection<String, String>> redisConnectionPool;
 
+    private final String redisHost;
+
+    private final int redisPort;
+
     public RedisService(@Autowired RedisConfiguration redisConfig) {
+        this.redisHost = redisConfig.getHost();
+        this.redisPort = redisConfig.getPort();
+        // #region agent log
+        try {
+            String line = "{\"sessionId\":\"937087\",\"hypothesisId\":\"H2\",\"runId\":\"pre-fix\",\"location\":\"RedisService:<init>\",\"message\":\"redis resolved config\",\"data\":{\"host\":\""
+                    + redisHost.replace("\\", "\\\\").replace("\"", "\\\"") + "\",\"port\":" + redisPort + ",\"database\":"
+                    + redisConfig.getDatabase() + "},\"timestamp\":" + System.currentTimeMillis() + "}\n";
+            Files.writeString(Path.of(System.getProperty("user.dir"), "debug-937087.log"), line,
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (Exception ignored) {
+        }
+        // #endregion
         RedisURI uri = RedisURI.Builder.redis(redisConfig.getHost(), redisConfig.getPort())
                 .withPassword(redisConfig.getPassword().toCharArray()).withDatabase(redisConfig.getDatabase()).build();
         this.redisClient = RedisClient.create(uri);
@@ -141,7 +163,21 @@ public class RedisService {
             return callback.doInConnection(commands);
         } catch (Exception e) {
             logger.warn("executeSync redis failed.", e);
-            throw new RuntimeException(e);
+            // #region agent log
+            try {
+                String detail = e.getMessage() == null ? "" : e.getMessage().replace("\\", "\\\\").replace("\"", "\\\"");
+                String line = "{\"sessionId\":\"937087\",\"hypothesisId\":\"H1\",\"runId\":\"pre-fix\",\"location\":\"RedisService:executeSync\",\"message\":\"redis op failed\",\"data\":{\"host\":\""
+                        + redisHost.replace("\\", "\\\\").replace("\"", "\\\"") + "\",\"port\":" + redisPort + ",\"ex\":\""
+                        + e.getClass().getSimpleName() + "\",\"detail\":\"" + detail + "\"},\"timestamp\":"
+                        + System.currentTimeMillis() + "}\n";
+                Files.writeString(Path.of(System.getProperty("user.dir"), "debug-937087.log"), line,
+                        StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (Exception ignored) {
+            }
+            // #endregion
+            throw new RuntimeException("Redis unavailable at " + redisHost + ":" + redisPort
+                    + " (connection refused usually means Redis is not running). Start Redis (e.g. docker compose in build/) or set REDIS_HOST/REDIS_PORT.",
+                    e);
         }
     }
 }

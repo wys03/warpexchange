@@ -18,6 +18,147 @@ div.ex-depth-sell {
 div.ex-depth-buy {
 	background-color: rgb(25, 135, 84);
 }
+
+.trade-page {
+	--ths-border: #2a3750;
+	--ths-text: #e8eef6;
+	--ths-muted: #8ea4be;
+	color: var(--ths-text);
+}
+.trade-page .trade-col .card {
+	border: 1px solid var(--ths-border);
+	border-radius: 10px;
+	box-shadow: 0 10px 24px rgba(4, 10, 19, .28);
+}
+.trade-page .card-header {
+	padding: .5rem .72rem;
+	font-size: .88rem;
+	font-weight: 700;
+	background: linear-gradient(180deg, #223047, #1b2739);
+	border-bottom: 1px solid #2d3d56;
+}
+.trade-page .card-body {
+	padding: .58rem .68rem;
+}
+.trade-page .table {
+	font-size: .9rem;
+	margin-bottom: 0;
+}
+.trade-page .table th {
+	font-size: .85rem;
+	color: #c3d4e7;
+	font-weight: 700;
+	letter-spacing: .02em;
+}
+.trade-page .table td,
+.trade-page .table th {
+	padding-top: .3rem;
+	padding-bottom: .3rem;
+	vertical-align: middle;
+}
+.trade-page .trade-col a {
+	text-decoration: none;
+}
+.trade-page .metric-strip {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px;
+	margin-top: 8px;
+}
+.trade-page .metric {
+	border: 1px solid #2a3a52;
+	border-radius: 8px;
+	padding: 8px 10px;
+	background: #182235;
+}
+.trade-page .metric .k {
+	font-size: .82rem;
+	color: #bfcee0;
+}
+.trade-page .metric .v {
+	font-size: 1rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+.trade-page .order-list-wrap {
+	max-height: 280px;
+	overflow-y: auto;
+}
+.trade-page .orderbook-wrap,
+.trade-page .ticks-wrap {
+	max-height: 295px;
+	overflow-y: auto;
+}
+.trade-page .chart-card #chart {
+	height: 418px;
+}
+.trade-page .order-tabs .nav-link {
+	padding: .35rem .7rem;
+	font-size: .87rem;
+	color: #bdd0e5;
+}
+.trade-page .order-tabs .nav-link.active {
+	color: #9dc2ff;
+	font-weight: 700;
+	background: #23314a;
+	border-color: #355074 #355074 #23314a;
+}
+.trade-page #inputPrice,
+.trade-page #inputQuantity {
+	font-size: .92rem;
+	font-variant-numeric: tabular-nums;
+}
+.trade-page .form-label {
+	font-size: .88rem;
+	color: #bfd0e3;
+	margin-bottom: .28rem;
+}
+.trade-page .btn-trade {
+	font-size: .9rem;
+	font-weight: 700;
+}
+.trade-page .depth-cell {
+	position: relative;
+	isolation: isolate;
+}
+.trade-page .depth-cell span {
+	position: relative;
+	z-index: 2;
+}
+div.ex-depth {
+	border-radius: 3px;
+}
+div.ex-depth-sell {
+	background-color: rgba(239, 68, 68, .28);
+}
+div.ex-depth-buy {
+	background-color: rgba(34, 197, 94, .26);
+}
+.trade-page .last-price-row {
+	background: rgba(79, 140, 255, .08);
+}
+.trade-page .last-price-row td {
+	font-weight: 700;
+	color: #b9d3ff;
+}
+@media (max-width: 991.98px) {
+	.trade-page .order-list-wrap,
+	.trade-page .orderbook-wrap,
+	.trade-page .ticks-wrap {
+		max-height: none;
+	}
+	.trade-page .chart-card #chart {
+		height: 350px;
+	}
+	.trade-page .metric-strip {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+@media (max-width: 575.98px) {
+	.trade-page .metric-strip {
+		grid-template-columns: repeat(1, minmax(0, 1fr));
+	}
+}
 </style>
 
 {% endblock %}
@@ -28,6 +169,15 @@ div.ex-depth-buy {
 <script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
 
 <script>
+// #region agent log
+fetch('http://127.0.0.1:7859/ingest/868b4595-e856-4c71-8982-8713fca3601e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'937087'},body:JSON.stringify({sessionId:'937087',runId:'initial',hypothesisId:'H7',location:'index.html:66',message:'index script start',data:{path:window.location.pathname,readyState:document.readyState},timestamp:Date.now()})}).catch(()=>{});
+// #endregion
+// #region agent log
+window.addEventListener('error', function (e) {
+	fetch('http://127.0.0.1:7859/ingest/868b4595-e856-4c71-8982-8713fca3601e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'937087'},body:JSON.stringify({sessionId:'937087',runId:'initial',hypothesisId:'H8',location:'index.html:70',message:'window error',data:{msg:e.message,file:e.filename,line:e.lineno,col:e.colno},timestamp:Date.now()})}).catch(()=>{});
+});
+// #endregion
+
 // 展示的OrderBook最大个数:
 const MAX_ORDERBOOK_ITEMS = 5;
 
@@ -141,6 +291,10 @@ function fillTicks(tickList) {
 function setWsStatus(status) {
 	$('#navStatus .x-ws-status').hide();
 	$('#navStatus .x-ws-' + status).show();
+	window._wsStatus = status;
+	if (window.app) {
+		window.app.wsStatus = status;
+	}
 }
 
 // 关闭WebSocket:
@@ -181,18 +335,34 @@ async function initChart() {
 	const CHART_HEIGHT = 397;
 	window.chart = LightweightCharts.createChart($('#chart').get(0), {
 		layout: {
-			textColor: 'rgb(33, 37, 41)'
+			background: { color: '#ffffff' },
+			textColor: '#4b5563'
+		},
+		grid: {
+			vertLines: { color: '#f1f3f5' },
+			horzLines: { color: '#f1f3f5' }
 		},
 		timeScale: {
-			timeVisible: true
+			timeVisible: true,
+			borderColor: '#e5e7eb'
+		},
+		rightPriceScale: {
+			borderColor: '#e5e7eb'
 		},
 		height: CHART_HEIGHT
 	});
 
 	// 添加K线图:
 	window.chartCandlestickSeries = window.chart.addCandlestickSeries({
-		upColor: 'rgb(25, 135, 84)',
-		downColor: 'rgb(220, 53, 69)',
+		upColor: '#16a34a',
+		downColor: '#ef4444',
+		borderVisible: true,
+		wickUpColor: '#16a34a',
+		wickDownColor: '#ef4444',
+		borderUpColor: '#16a34a',
+		borderDownColor: '#ef4444',
+		priceLineColor: '#9ca3af',
+		priceLineWidth: 1
 	});
 	window.chartCandlestickSeries.setData(dataList.map(toSingleChartData));
 
@@ -263,6 +433,7 @@ function initApp() {
 	window.app = new Vue({
 		el: '#app',
 		data: {
+			wsStatus: window._wsStatus || 'disconnected',
 			assets: {
 				BTC: {
 					available: NaN,
@@ -299,6 +470,43 @@ function initApp() {
 			// 是否可以下单:
 			orderFormReady: function () {
 				return this.orderForm.price !== '' && this.orderForm.quantity != '';
+			},
+			marketLastPrice: function () {
+				return this.orderBook.price;
+			},
+			marketChangeValue: function () {
+				let valid = this.ticks.filter(function (t) { return !isNaN(t[2]); });
+				if (valid.length < 2) {
+					return NaN;
+				}
+				return valid[0][2] - valid[valid.length - 1][2];
+			},
+			marketChangePct: function () {
+				let valid = this.ticks.filter(function (t) { return !isNaN(t[2]); });
+				if (valid.length < 2 || valid[valid.length - 1][2] === 0) {
+					return NaN;
+				}
+				return this.marketChangeValue / valid[valid.length - 1][2] * 100;
+			},
+			marketTurnover: function () {
+				let total = 0;
+				let has = false;
+				this.ticks.forEach(function (t) {
+					if (!isNaN(t[2]) && !isNaN(t[3])) {
+						total += t[2] * t[3];
+						has = true;
+					}
+				});
+				return has ? total : NaN;
+			},
+			wsStatusLabel: function () {
+				if (this.wsStatus === 'connected') {
+					return '已连接';
+				}
+				if (this.wsStatus === 'connecting') {
+					return '连接中';
+				}
+				return '未连接';
 			}
 		},
 		methods: {
@@ -306,6 +514,19 @@ function initApp() {
 			formatNumber: function (value) {
 				if (isNaN(value)) {
 					return '-';
+				}
+				return value.toFixed(2);
+			},
+			formatCompact: function (value) {
+				if (isNaN(value)) {
+					return '-';
+				}
+				let abs = Math.abs(value);
+				if (abs >= 100000000) {
+					return (value / 100000000).toFixed(2) + '亿';
+				}
+				if (abs >= 10000) {
+					return (value / 10000).toFixed(2) + '万';
 				}
 				return value.toFixed(2);
 			},
@@ -328,10 +549,24 @@ function initApp() {
 				}
 				return '0%';
 			},
-			// 调用REST API刷新资产:
+			// 调用REST API刷新资产（引擎侧无记录时可能返回 {}，需合并默认结构避免模板读 undefined）:
 			refreshAssets: async function () {
 				try {
-					this.assets = await get('/api/assets');
+					const raw = await get('/api/assets') || {};
+					const pick = function (sym) {
+						const a = raw[sym];
+						if (!a) {
+							return { available: NaN, frozen: NaN };
+						}
+						return {
+							available: a.available != null ? Number(a.available) : NaN,
+							frozen: a.frozen != null ? Number(a.frozen) : NaN
+						};
+					};
+					this.assets = {
+						BTC: pick('BTC'),
+						USD: pick('USD')
+					};
 				} catch (err) {
 					return showError(err.message || err.error || 'Error');
 				}
@@ -452,18 +687,18 @@ function initApp() {
 {% endblock %}
 
 {% block content %}
-<div id="app">
-	<div class="row">
-		<div class="col-sm-6 col-md-4 col-lg-3 bg-red">
+<div id="app" class="trade-page">
+	<div class="row g-2">
+		<div class="col-sm-6 col-md-4 col-lg-3 trade-col">
 			<div class="card mt-2">
-				<div class="card-header">Balance</div>
+				<div class="card-header">账户余额</div>
 				<div class="card-body">
 					<table class="table table-sm table-hover mb-0" style="font-variant-numeric: tabular-nums">
 						<thead>
 							<tr>
-								<th>Asset</th>
-								<th class="text-end">Available</th>
-								<th class="text-end">Frozen</th>
+								<th>资产</th>
+								<th class="text-end">可用</th>
+								<th class="text-end">冻结</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -477,29 +712,29 @@ function initApp() {
 								<td class="text-end" v-text="formatNumber(assets.BTC.available)"></td>
 								<td class="text-end" v-text="formatNumber(assets.BTC.frozen)"></td>
 							</tr>
-						<tbody>
+						</tbody>
 					</table>
 				</div>
 			</div>
 			<div class="card mt-2 mb-2">
-				<div class="card-header">Order Form</div>
+				<div class="card-header">下单</div>
 				<div class="card-body">
 					<form>
 						<div class="mb-3">
-							<label for="inputPrice" class="form-label">Price:</label>
+							<label for="inputPrice" class="form-label">价格：</label>
 							<input type="number" step="0.01" min="1" id="inputPrice" class="form-control" placeholder="Price" v-model="orderForm.price">
 						</div>
 						<div class="mb-3">
-							<label for="inputQuantity" class="form-label">Quantity:</label>
+							<label for="inputQuantity" class="form-label">数量：</label>
 							<input type="number" step="0.01" min="0.01" id="inputQuantity" class="form-control" placeholder="Quantity" v-model="orderForm.quantity">
 						</div>
 						<div class="mb-2">
 							<div class="row">
 								<div class="col">
-									<button type="button" class="btn btn-success w-100" v-on:click="createOrder('BUY')" v-bind:disabled="!orderFormReady">Buy</button>
+									<button type="button" class="btn btn-success btn-trade w-100" v-on:click="createOrder('BUY')" v-bind:disabled="!orderFormReady">买入</button>
 								</div>
 								<div class="col">
-									<button type="button" class="btn btn-danger w-100" v-on:click="createOrder('SELL')" v-bind:disabled="!orderFormReady">Sell</button>
+									<button type="button" class="btn btn-danger btn-trade w-100" v-on:click="createOrder('SELL')" v-bind:disabled="!orderFormReady">卖出</button>
 								</div>
 							</div>
 						</div>
@@ -507,33 +742,51 @@ function initApp() {
 				</div>
 			</div>
 		</div>
-		<div class="col-sm-6 col-md-4 col-lg-6 bg-yellow">
-			<div class="card mt-2">
-				<div class="card-header">Chart</div>
+		<div class="col-sm-6 col-md-4 col-lg-6 trade-col">
+			<div class="card mt-2 chart-card">
+				<div class="card-header">K线图</div>
 				<div class="card-body">
 					<div id="chart" style="height: 397px"></div>
+					<div class="metric-strip">
+						<div class="metric">
+							<div class="k">最新价</div>
+							<div class="v" v-text="formatNumber(marketLastPrice)"></div>
+						</div>
+						<div class="metric">
+							<div class="k">涨跌额</div>
+							<div class="v" v-bind:class="{'text-danger': marketChangeValue >= 0, 'text-success': marketChangeValue < 0}" v-text="formatNumber(marketChangeValue)"></div>
+						</div>
+						<div class="metric">
+							<div class="k">涨跌幅</div>
+							<div class="v" v-bind:class="{'text-danger': marketChangePct >= 0, 'text-success': marketChangePct < 0}" v-text="isNaN(marketChangePct) ? '-' : (marketChangePct.toFixed(2) + '%')"></div>
+						</div>
+						<div class="metric">
+							<div class="k">成交额</div>
+							<div class="v" v-text="formatCompact(marketTurnover)"></div>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div class="card mt-2 mb-2">
 				<div class="card-header">
-					<ul class="nav nav-tabs card-header-tabs">
+					<ul class="nav nav-tabs card-header-tabs order-tabs">
 						<li class="nav-item">
-							<a class="nav-link" href="#0" v-on:click="showActiveOrders=true" v-bind:class="{'active':showActiveOrders}">Active Orders</a>
+							<a class="nav-link" href="#0" v-on:click="showActiveOrders=true" v-bind:class="{'active':showActiveOrders}">当前委托</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="#0" v-on:click="showActiveOrders=false" v-bind:class="{'active':!showActiveOrders}">History Orders</a>
+							<a class="nav-link" href="#0" v-on:click="showActiveOrders=false" v-bind:class="{'active':!showActiveOrders}">历史委托</a>
 						</li>
 					</ul>
 				</div>
-				<div class="card-body">
+				<div class="card-body order-list-wrap">
 					<!-- active orders -->
 					<table class="table table-sm table-hover mb-0" style="font-variant-numeric: tabular-nums" v-show="showActiveOrders">
 						<thead>
 							<tr>
-								<th>Direction</th>
-								<th class="text-end">Price</th>
-								<th class="text-end">Quantity</th>
-								<th class="text-end">Unfilled</th>
+								<th>方向</th>
+								<th class="text-end">价格</th>
+								<th class="text-end">数量</th>
+								<th class="text-end">未成交</th>
 								<th class="text-end"><a href="#0" v-on:click="refreshActiveOrders"><i class="bi bi-arrow-clockwise"></i></a></th>
 							</tr>
 						</thead>
@@ -543,19 +796,19 @@ function initApp() {
 								<td class="text-end" v-text="formatNumber(order.price)"></td>
 								<td class="text-end" v-text="formatNumber(order.quantity)"></td>
 								<td class="text-end" v-text="formatNumber(order.unfilledQuantity)"></td>
-								<td class="text-end"><a href="#0" v-on:click="cancelOrder(order.id)">Cancel</a></td>
+								<td class="text-end"><a href="#0" v-on:click="cancelOrder(order.id)">撤单</a></td>
 							</tr>
-						<tbody>
+						</tbody>
 					</table>
 					<!-- // active orders -->
 					<!-- history orders -->
 					<table class="table table-sm table-hover mb-0" style="font-variant-numeric: tabular-nums" v-show="!showActiveOrders">
 						<thead>
 							<tr>
-								<th>Direction</th>
-								<th class="text-end">Price</th>
-								<th class="text-end">Quantity</th>
-								<th class="text-end">Unfilled</th>
+								<th>方向</th>
+								<th class="text-end">价格</th>
+								<th class="text-end">数量</th>
+								<th class="text-end">未成交</th>
 								<th class="text-end"><a href="#0" v-on:click="refreshHistoryOrders"><i class="bi bi-arrow-clockwise"></i></a></th>
 							</tr>
 						</thead>
@@ -567,21 +820,21 @@ function initApp() {
 								<td class="text-end" v-text="formatNumber(order.unfilledQuantity)"></td>
 								<td class="text-end" v-text="formatTime(order.updatedAt)"></td>
 							</tr>
-						<tbody>
+						</tbody>
 					</table>
 					<!-- // active orders -->
 				</div>
 			</div>
 		</div>
-		<div class="col-sm-6 col-md-4 col-lg-3 bg-navy">
+		<div class="col-sm-6 col-md-4 col-lg-3 trade-col">
 			<div class="card mt-2">
-				<div class="card-header">Order Book</div>
-				<div class="card-body">
+				<div class="card-header">委托簿</div>
+				<div class="card-body orderbook-wrap">
 					<table class="table table-sm mb-0" style="font-variant-numeric: tabular-nums">
 						<thead>
 							<tr>
-								<th class="text-end">Price</th>
-								<th class="text-end">Quantity</th>
+								<th class="text-end">价格</th>
+								<th class="text-end">数量</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -589,12 +842,12 @@ function initApp() {
 								<td class="text-end">
 									<a href="#0" class="text-decoration-none text-danger" v-on:click="setPrice(item.price)" v-text="formatNumber(item.price)"></a>
 								</td>
-								<td class="text-end" style="position: relative">
+								<td class="text-end depth-cell">
 									<div class="ex-depth ex-depth-sell" v-bind:style="{width: depthWidth(item.quantity)}"></div>
 									<span v-text="formatNumber(item.quantity)"></span>
 								</td>
 							</tr>
-							<tr>
+							<tr class="last-price-row">
 								<td class="text-end">
 									<span v-text="formatNumber(orderBook.price)"></span>
 								</td>
@@ -604,19 +857,19 @@ function initApp() {
 								<td class="text-end">
 									<a href="#0" class="text-decoration-none text-success" v-on:click="setPrice(item.price)" v-text="formatNumber(item.price)"></a>
 								</td>
-								<td class="text-end" style="position: relative">
+								<td class="text-end depth-cell">
 									<div class="ex-depth ex-depth-buy" v-bind:style="{width: depthWidth(item.quantity)}"></div>
 									<span v-text="formatNumber(item.quantity)"></span>
 								</td>
 							</tr>
-						<tbody>
+						</tbody>
 					</table>
 				</div>
 			</div>
 
 			<div class="card mt-2 mb-2">
-				<div class="card-header">Recent Ticks</div>
-				<div class="card-body">
+				<div class="card-header">最新成交</div>
+				<div class="card-body ticks-wrap">
 					<table class="table table-sm table-hover mb-0" style="font-variant-numeric: tabular-nums">
 						<tbody>
 							<tr v-for="tick in ticks" v-bind:class="{'text-danger':tick[1]==0,'text-success':tick[1]==1}">
@@ -624,7 +877,7 @@ function initApp() {
 								<td class="text-end" v-text="formatNumber(tick[2])"></td>
 								<td class="text-end" v-text="formatNumber(tick[3])"></td>
 							</tr>
-						<tbody>
+						</tbody>
 					</table>
 				</div>
 			</div>

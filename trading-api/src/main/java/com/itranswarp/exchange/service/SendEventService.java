@@ -10,6 +10,9 @@ import com.itranswarp.exchange.messaging.MessageProducer;
 import com.itranswarp.exchange.messaging.Messaging;
 import com.itranswarp.exchange.messaging.MessagingFactory;
 
+/**
+ * 发送事件服务
+ */
 @Component
 public class SendEventService {
 
@@ -23,6 +26,10 @@ public class SendEventService {
         this.messageProducer = messagingFactory.createMessageProducer(Messaging.Topic.SEQUENCE, AbstractEvent.class);
     }
 
+    /**
+     * 发送事件
+     * @param message 事件
+     */
     public void sendMessage(AbstractEvent message) {
         this.messageProducer.sendMessage(message);
     }

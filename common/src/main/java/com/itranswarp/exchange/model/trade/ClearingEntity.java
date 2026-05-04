@@ -15,6 +15,9 @@ import com.itranswarp.exchange.enums.OrderStatus;
 import com.itranswarp.exchange.enums.ClearingType;
 import com.itranswarp.exchange.model.support.EntitySupport;
 
+/**
+ *
+ */
 @Entity
 @Table(name = "clearings", uniqueConstraints = @UniqueConstraint(name = "UNI_SEQ_ORD_CORD", columnNames = "sequenceId,orderId,counterOrderId"))
 public class ClearingEntity implements EntitySupport {

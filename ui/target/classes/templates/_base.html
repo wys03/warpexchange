@@ -4,13 +4,186 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Warp Exchange</title>
+	<title>{% block title %}Warp Exchange{% endblock %}</title>
 	<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 	<link rel="stylesheet" href="https://unpkg.com/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="https://unpkg.com/bootstrap-icons@1.8.3/font/bootstrap-icons.css" />
 	<script src="https://unpkg.com/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
 	<script src="https://unpkg.com/vue@2.7.4/dist/vue.js"></script>
+
+	<style>
+	:root {
+		--warp-bg: #0f141d;
+		--warp-surface: #141b26;
+		--warp-surface-2: #1a2331;
+		--warp-border: #263244;
+		--warp-text: #f1f6fd;
+		--warp-muted: #b2c2d5;
+		--warp-accent: #4f8cff;
+		--warp-accent-soft: rgba(79, 140, 255, 0.15);
+		--warp-buy: #22c55e;
+		--warp-sell: #ef4444;
+		--warp-warning: #f59e0b;
+		--warp-shadow: 0 10px 24px rgba(3, 8, 17, 0.35);
+		--warp-radius: 10px;
+		--warp-nav-h: 56px;
+	}
+	body {
+		background: radial-gradient(1200px 500px at 15% -10%, #202b3d 0%, var(--warp-bg) 50%);
+		color: var(--warp-text);
+		padding-top: var(--warp-nav-h);
+		font-size: 15px;
+		line-height: 1.5;
+	}
+	.warp-top-nav {
+		background: rgba(20, 27, 38, 0.92);
+		border-bottom: 1px solid var(--warp-border);
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 1030;
+		min-height: var(--warp-nav-h);
+		backdrop-filter: blur(8px);
+		box-shadow: 0 6px 18px rgba(4, 9, 17, 0.45);
+	}
+	.warp-top-nav .warp-brand {
+		font-size: 1.2rem;
+		font-weight: 800;
+		color: #7eb0ff !important;
+		text-decoration: none;
+	}
+	.warp-top-nav .warp-menu a {
+		color: var(--warp-muted);
+		text-decoration: none;
+		font-size: 0.93rem;
+		padding: 0.44rem 0.68rem;
+		border-radius: 6px;
+		transition: background-color .15s ease, color .15s ease;
+	}
+	.warp-top-nav .warp-menu a:hover {
+		background: var(--warp-accent-soft);
+		color: #dce9ff;
+	}
+	.warp-top-nav .nav-link,
+	.warp-top-nav .navbar-text {
+		color: #d0deee !important;
+	}
+	.warp-top-nav .nav-link:hover {
+		color: #e5eef9 !important;
+	}
+	.warp-shell {
+		margin-top: 0;
+		margin-bottom: 24px;
+	}
+	.card {
+		border: 1px solid var(--warp-border);
+		background: linear-gradient(180deg, rgba(26, 35, 49, 0.96), rgba(21, 29, 41, 0.95));
+		box-shadow: var(--warp-shadow);
+		border-radius: var(--warp-radius);
+	}
+	.card-header {
+		font-weight: 700;
+		font-size: 0.96rem;
+		background: linear-gradient(180deg, rgba(35, 47, 66, 0.95), rgba(27, 38, 54, 0.95));
+		border-bottom: 1px solid var(--warp-border);
+		color: #f0f6ff;
+	}
+	.table {
+		color: var(--warp-text);
+		font-size: 0.92rem;
+	}
+	.table thead th {
+		color: #c7d8ea;
+		border-bottom-color: #2a3850;
+		font-weight: 700;
+	}
+	.table tbody td,
+	.table tbody th {
+		border-color: #223045;
+	}
+	.form-control,
+	.form-select {
+		color: var(--warp-text);
+		background-color: #111a27;
+		border-color: #2a3750;
+	}
+	.form-control::placeholder {
+		color: #9eb1c6;
+	}
+	.form-label {
+		color: #c3d3e6;
+		font-size: 0.9rem;
+	}
+	.form-control:focus,
+	.form-select:focus {
+		color: var(--warp-text);
+		background-color: #0f1826;
+		border-color: var(--warp-accent);
+		box-shadow: 0 0 0 0.16rem rgba(79, 140, 255, 0.25);
+	}
+	.btn {
+		border-radius: 8px;
+		font-weight: 600;
+	}
+	.btn-success {
+		background-color: var(--warp-buy);
+		border-color: var(--warp-buy);
+	}
+	.btn-danger {
+		background-color: var(--warp-sell);
+		border-color: var(--warp-sell);
+	}
+	.btn-outline-danger {
+		color: #ff8f8f;
+		border-color: #a33f4b;
+	}
+	.btn-outline-danger:hover {
+		background-color: #7f303b;
+		border-color: #a94d58;
+	}
+	a {
+		color: #93bcff;
+	}
+	a:hover {
+		color: #bfd8ff;
+	}
+	.text-muted {
+		color: var(--warp-muted) !important;
+	}
+	.text-danger {
+		color: #ff8e8e !important;
+	}
+	.text-success {
+		color: #7df3ab !important;
+	}
+	.badge.bg-secondary {
+		background-color: #33455f !important;
+		color: #d6e4f5;
+	}
+	.toast {
+		background: rgba(27, 37, 52, 0.96);
+		border: 1px solid #34445d;
+		backdrop-filter: blur(4px);
+	}
+	.toast.bg-danger {
+		background: rgba(132, 45, 58, 0.95) !important;
+	}
+	.toast.bg-primary {
+		background: rgba(39, 74, 132, 0.95) !important;
+	}
+	:focus-visible {
+		outline: 2px solid rgba(93, 150, 255, 0.9);
+		outline-offset: 2px;
+	}
+	@media (max-width: 767.98px) {
+		.warp-top-nav .warp-menu a {
+			padding: 0.35rem 0.45rem;
+			font-size: 0.82rem;
+		}
+	}
+	</style>
 
 	{% block style %}
 	<style>
@@ -29,48 +202,58 @@
 </head>
 
 <body>
-	<!-- 导航栏 -->
-	<nav class="navbar navbar-expand-lg navbar-default bg-white border-bottom" style="background-color:#fff;position:fixed;top:0;left:0;right:0;z-index:100;">
-		<div class="container px-2">
-			<a class="navbar-brand d-none d-sm-block" style="font-size:1.2rem;" href="/">
-				<span><i class="bi bi-lightning"></i> Warp Exchange</span>
-			</a>
-			<a class="navbar-brand d-block d-sm-none" style="font-size:1.2rem;" href="/">
-				<span><i class="bi bi-lightning"></i></span>
-			</a>
-			{% if __profile__ != null %}
-			<ul id="navStatus" class="mr-2 navbar-nav navbar-right-wrap flex-row">
-				<!-- WebSocket连接状态 -->
-				<span class="x-ws-status x-ws-disconnected me-3 navbar-text text-muted"><i class="bi bi-wifi-off"></i></span>
-				<span class="x-ws-status x-ws-connected me-3 navbar-text text-success" style="display:none"><i class="bi bi-wifi"></i></span>
-				<span class="x-ws-status x-ws-connecting me-3 navbar-text text-info" style="display:none"><i class="bi bi-wifi-2"></i></span>
-
-				<span class="navbar-text d-none d-sm-block"><i class="bi bi-person"></i> {{ __profile__.name }}</span>
-				<span class="navbar-text d-block d-sm-none"><i class="bi bi-person"></i></span>
-				<li class="ms-2 nav-item"><a href="/signout" class="nav-link">Sign Out</a></li>
-			</ul>
-			{% endif %}
+	<nav class="warp-top-nav">
+		<div class="container-fluid px-2 px-md-3">
+			<div class="d-flex align-items-center gap-2 py-2">
+				<a class="warp-brand me-2" href="/"><i class="bi bi-lightning-charge-fill"></i> Warp</a>
+				<div class="warp-menu d-flex align-items-center gap-1 me-2">
+					<a href="/"><i class="bi bi-house-door"></i> 首页</a>
+					{% if __profile__ != null %}
+					<a href="/trade"><i class="bi bi-graph-up-arrow"></i> 交易</a>
+					<a href="/wallet"><i class="bi bi-wallet2"></i> 资金</a>
+					{% endif %}
+				</div>
+				{% if __profile__ != null %}
+				<ul id="navStatus" class="navbar-nav flex-row align-items-center ms-auto gap-2">
+					<span class="x-ws-status x-ws-disconnected navbar-text text-muted small"><i class="bi bi-wifi-off"></i></span>
+					<span class="x-ws-status x-ws-connected navbar-text text-success small" style="display:none"><i class="bi bi-wifi"></i></span>
+					<span class="x-ws-status x-ws-connecting navbar-text text-info small" style="display:none"><i class="bi bi-wifi-2"></i></span>
+					<li class="nav-item d-none d-sm-block"><span class="navbar-text small"><i class="bi bi-person-circle"></i> {{ __profile__.name }}</span></li>
+					<li class="nav-item"><a class="nav-link py-0 small" href="/trade">进入交易</a></li>
+					<li class="nav-item"><a class="nav-link py-0 small text-muted" href="/signout">退出</a></li>
+				</ul>
+				{% else %}
+				<div class="ms-auto d-flex align-items-center gap-2">
+					<a href="/signin" class="btn btn-sm btn-outline-danger">登录</a>
+					<a href="/signup" class="small text-muted text-decoration-none">注册</a>
+				</div>
+				{% endif %}
+			</div>
 		</div>
 	</nav>
-	<!-- // 导航栏 -->
 
-	<div class="container" style="margin-top: 57px; margin-bottom: 41px;">
+	<div class="{% block content_container_class %}container-lg px-2 px-md-3{% endblock %} warp-shell">
 		{% block content %}
 		<p>content here</p>
 		{% endblock %}
 	</div>
 
-	<!-- 页脚 -->
-	<div class="container" style="background-color:#fff;position:fixed;bottom:0;left:0;right:0;z-index:100;">
-		<div class="pt-2 pb-2 text-center border-top">
-			<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1266263401691296" target="_blank">Learn How to Design</a>
-			&nbsp; &nbsp;
-			<a href="https://github.com/michaelliao/warpexchange" target="_blank">Source Code</a>
-			&nbsp; &nbsp;
-			<a href="https://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">License</a>
-		</div>
-	</div>
-	<!-- // 页脚 -->
+	<script>
+	// #region agent log
+	(function () {
+		fetch('http://127.0.0.1:7859/ingest/868b4595-e856-4c71-8982-8713fca3601e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'937087'},body:JSON.stringify({sessionId:'937087',runId:'initial',hypothesisId:'H4',location:'_base.html:136',message:'base rendered',data:{path:window.location.pathname,bodyChildren:document.body?document.body.children.length:-1,hasNav:!!document.querySelector('.warp-top-nav')},timestamp:Date.now()})}).catch(()=>{});
+	})();
+	// #endregion
+	// #region agent log
+	(function () {
+		var shell = document.querySelector('.warp-shell');
+		var style = shell ? window.getComputedStyle(shell) : null;
+		fetch('http://127.0.0.1:7859/ingest/868b4595-e856-4c71-8982-8713fca3601e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'937087'},body:JSON.stringify({sessionId:'937087',runId:'initial',hypothesisId:'H5',location:'_base.html:142',message:'layout visibility snapshot',data:{hasShell:!!shell,display:style?style.display:null,visibility:style?style.visibility:null,opacity:style?style.opacity:null,htmlLength:document.documentElement?document.documentElement.innerText.length:-1},timestamp:Date.now()})}).catch(()=>{});
+	})();
+	// #endregion
+	</script>
+
+
 </body>
 
 </html>

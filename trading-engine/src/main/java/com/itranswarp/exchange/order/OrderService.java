@@ -15,6 +15,11 @@ import com.itranswarp.exchange.enums.AssetEnum;
 import com.itranswarp.exchange.enums.Direction;
 import com.itranswarp.exchange.model.trade.OrderEntity;
 
+/**
+ * 订单服务
+ *
+ * 活动订单、创建订单实体、按 id 查询等
+ */
 @Component
 public class OrderService {
 
@@ -24,31 +29,39 @@ public class OrderService {
         this.assetService = assetService;
     }
 
-    // 跟踪所有活动订单:
+    // 跟踪所有活动订单:activeOrders：orderId → OrderEntity，按 ID 查单、撤单校验。
     final ConcurrentMap<Long, OrderEntity> activeOrders = new ConcurrentHashMap<>();
 
-    // 跟踪用户活动订单:
+    // 跟踪用户活动订单:userOrders：userId → (orderId → OrderEntity)，按用户枚举订单（内部 API / 查询用）。
     final ConcurrentMap<Long, ConcurrentMap<Long, OrderEntity>> userOrders = new ConcurrentHashMap<>();
 
     /**
      * 创建订单，失败返回null:
+     * @param sequenceId    序列ID
+     * @param ts            时间戳
+     * @param orderId       订单ID
+     * @param userId        用户ID
+     * @param direction     方向
+     * @param price         价格
+     * @param quantity      数量
+     * @return 订单实体
      */
     public OrderEntity createOrder(long sequenceId, long ts, Long orderId, Long userId, Direction direction,
             BigDecimal price, BigDecimal quantity) {
         switch (direction) {
-        case BUY -> {
-            // 买入，需冻结USD：
-            if (!assetService.tryFreeze(userId, AssetEnum.USD, price.multiply(quantity))) {
-                return null;
+            case BUY -> {
+                // 买入，需冻结USD：
+                if (!assetService.tryFreeze(userId, AssetEnum.USD, price.multiply(quantity))) {
+                    return null;
+                }
             }
-        }
-        case SELL -> {
-            // 卖出，需冻结BTC：
-            if (!assetService.tryFreeze(userId, AssetEnum.BTC, quantity)) {
-                return null;
+            case SELL -> {
+                // 卖出，需冻结BTC：
+                if (!assetService.tryFreeze(userId, AssetEnum.BTC, quantity)) {
+                    return null;
+                }
             }
-        }
-        default -> throw new IllegalArgumentException("Invalid direction.");
+            default -> throw new IllegalArgumentException("Invalid direction.");
         }
         OrderEntity order = new OrderEntity();
         order.id = orderId;

@@ -5,6 +5,7 @@ import com.itranswarp.exchange.ApiException;
 
 /**
  * Holds user context in thread-local.
+ * 保存用户上下文的线程本地变量。
  */
 public class UserContext implements AutoCloseable {
 
@@ -12,6 +13,7 @@ public class UserContext implements AutoCloseable {
 
     /**
      * Get current user id, or throw exception if no user.
+     * 获取当前用户id，如果没有用户，则抛出异常。
      */
     public static Long getRequiredUserId() {
         Long userId = getUserId();
@@ -23,6 +25,7 @@ public class UserContext implements AutoCloseable {
 
     /**
      * Get current user id, or null if no user.
+     * 获取当前用户id，如果没有用户，则返回null。
      */
     public static Long getUserId() {
         return THREAD_LOCAL_CTX.get();

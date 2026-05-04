@@ -1,35 +1,28 @@
+# 日志
+*.log
+debug-*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+
 # IDE
 .idea/
-*.iml
+.vscode/
+*.swp
+*.swo
 
-# Build artifacts
-**/target/
-*.jar
-*.class
+# 构建产物
+build/
+dist/
+*.egg-info/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Temporary files
+# 临时文件
 *.tmp
-*.log
-
-# Docker runtime data (exclude data, keep config)
-build/docker/mysql-data/
-build/docker/mysql/logs/
-build/docker/redis/data/
-build/docker/mysql.sock
-
-# Node modules (if any)
-node_modules/
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Cache
-.cache/
+*.bak
+*.cache

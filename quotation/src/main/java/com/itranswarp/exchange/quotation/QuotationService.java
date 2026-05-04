@@ -1,6 +1,9 @@
 package com.itranswarp.exchange.quotation;
 
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
@@ -59,6 +62,15 @@ public class QuotationService extends LoggerSupport {
 
     @PostConstruct
     public void init() throws Exception {
+        // #region agent log
+        try {
+            String line = "{\"sessionId\":\"937087\",\"hypothesisId\":\"H3\",\"runId\":\"pre-fix\",\"location\":\"QuotationService:init\",\"message\":\"before redis script load\",\"data\":{\"step\":\"loadScriptFromClassPath\"},\"timestamp\":"
+                    + System.currentTimeMillis() + "}\n";
+            Files.writeString(Path.of(System.getProperty("user.dir"), "debug-937087.log"), line,
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (Exception ignored) {
+        }
+        // #endregion
         // init redis:
         this.shaUpdateRecentTicksLua = this.redisService.loadScriptFromClassPath("/redis/update-recent-ticks.lua");
         this.shaUpdateBarLua = this.redisService.loadScriptFromClassPath("/redis/update-bar.lua");

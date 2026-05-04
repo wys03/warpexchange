@@ -1,17 +1,17 @@
 package com.itranswarp.exchange.enums;
 
 /**
- * Match type constants.
+ * 撮合类型
  */
 public enum MatchType {
 
     /**
-     * Match as taker.
+     * 撮合为taker（吃单方）
      */
     TAKER,
 
     /**
-     * Match as maker.
+     * 撮合为maker（挂单方）
      */
     MAKER;
 }

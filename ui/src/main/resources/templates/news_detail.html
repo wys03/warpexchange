@@ -1,0 +1,135 @@
+{% extends("_base") %}
+
+{% block title %}资讯详情 - Warp Exchange{% endblock %}
+
+{% block style %}
+<style>
+.news-detail {
+	max-width: 1100px;
+	margin: 0 auto;
+}
+.news-detail .main-card,
+.news-detail .side-card {
+	background: linear-gradient(180deg, rgba(24, 35, 51, .96), rgba(20, 30, 44, .95));
+	border: 1px solid #2c3d58;
+	border-radius: 10px;
+	box-shadow: 0 10px 24px rgba(4, 10, 19, .28);
+}
+.news-detail .main-card {
+	padding: 14px 16px;
+}
+.news-detail .title {
+	font-size: 1.34rem;
+	font-weight: 700;
+	line-height: 1.4;
+	color: #f3f8ff;
+}
+.news-detail .meta {
+	font-size: .92rem;
+	color: #c4d4e7;
+}
+.news-detail .body p {
+	font-size: 1rem;
+	line-height: 1.85;
+	color: #eaf2fd;
+	margin-bottom: .9rem;
+}
+.news-detail .keywords .badge {
+	font-weight: 500;
+	background: rgba(79, 140, 255, .16) !important;
+	color: #d8e6f8 !important;
+	border: 1px solid #3a567d;
+}
+.news-detail .side-head {
+	padding: .56rem .75rem;
+	font-size: .96rem;
+	font-weight: 700;
+	color: #eaf2fd;
+	border-bottom: 1px solid #30435f;
+}
+.news-detail .side-body {
+	padding: .5rem .75rem;
+}
+.news-detail .rel-item {
+	display: block;
+	padding: .55rem 0;
+	border-bottom: 1px solid #2b3d59;
+	text-decoration: none;
+	color: #e8f0fb;
+}
+.news-detail .rel-item:last-child {
+	border-bottom: 0;
+}
+.news-detail .rel-item .t {
+	font-size: .92rem;
+	line-height: 1.5;
+}
+.news-detail .rel-item .m {
+	font-size: .84rem;
+	color: #bdd0e4;
+}
+.news-detail .rel-item:hover {
+	background: rgba(79, 140, 255, .08);
+}
+.news-detail .crumb {
+	color: #c7d8ec !important;
+	font-size: .95rem;
+}
+.news-detail .body h2,
+.news-detail .body h3,
+.news-detail .body h4 {
+	color: #f2f8ff;
+}
+.news-detail .body strong,
+.news-detail .body b {
+	color: #ffffff;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="news-detail py-2 py-md-3">
+	<div class="mb-2 small text-muted crumb">
+		<a href="/" class="text-decoration-none">首页</a> / 资讯详情
+	</div>
+
+	<div class="row g-2">
+		<div class="col-lg-8">
+			<div class="main-card">
+				<h1 class="title">{{ news.title }}</h1>
+				<div class="meta mt-2">
+					<span>{{ news.source }}</span>
+					<span class="mx-2">|</span>
+					<span>{{ news.publishedAt }}</span>
+					<span class="mx-2">|</span>
+					<span>作者：{{ news.author }}</span>
+				</div>
+				<div class="body mt-3">{{ news.contentHtml | raw }}</div>
+				<div class="keywords mt-3">
+					{% for kw in news.keywords %}
+					<span class="badge me-1">{{ kw }}</span>
+					{% endfor %}
+				</div>
+				<div class="mt-3">
+					<a href="/" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> 返回首页</a>
+					<a href="/trade" class="btn btn-sm btn-outline-danger ms-1">进入交易</a>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-lg-4">
+			<div class="side-card">
+				<div class="side-head"><i class="bi bi-list-stars me-1"></i>相关推荐</div>
+				<div class="side-body">
+					{% for row in relatedNews %}
+					<a class="rel-item" href="/news/{{ row.id }}">
+						<div class="t">{{ row.title }}</div>
+						<div class="m">{{ row.source }} · {{ row.time }}</div>
+					</a>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

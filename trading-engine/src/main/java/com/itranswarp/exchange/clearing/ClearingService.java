@@ -14,6 +14,11 @@ import com.itranswarp.exchange.model.trade.OrderEntity;
 import com.itranswarp.exchange.order.OrderService;
 import com.itranswarp.exchange.support.LoggerSupport;
 
+/**
+ * 清算服务
+ *
+ * 成交或撤单后的资金/持仓划转与解冻
+ */
 @Component
 public class ClearingService extends LoggerSupport {
 
@@ -26,6 +31,10 @@ public class ClearingService extends LoggerSupport {
         this.orderService = orderService;
     }
 
+    /**
+     * 清算成交结果
+     * @param result 成交结果
+     */
     public void clearMatchResult(MatchResult result) {
         OrderEntity taker = result.takerOrder;
         switch (taker.direction) {
@@ -38,7 +47,17 @@ public class ClearingService extends LoggerSupport {
                             detail.price(), detail.quantity(), detail.takerOrder().id, detail.makerOrder().id,
                             detail.takerOrder().userId, detail.makerOrder().userId);
                 }
+                /**
+                 * 获取卖方订单
+                 * @param detail 成交详情
+                 * @return 卖方订单
+                 */
                 OrderEntity maker = detail.makerOrder();
+                /**clearMatchResult
+                 * 获取成交数量
+                 * @param detail 成交详情
+                 * @return 成交数量
+                 */
                 BigDecimal matched = detail.quantity();
                 if (taker.price.compareTo(maker.price) > 0) {
                     // 实际买入价比报价低，部分USD退回账户:
@@ -90,6 +109,10 @@ public class ClearingService extends LoggerSupport {
         }
     }
 
+    /**
+     * 清算取消订单
+     * @param order 订单实体
+     */
     public void clearCancelOrder(OrderEntity order) {
         switch (order.direction) {
         case BUY -> {

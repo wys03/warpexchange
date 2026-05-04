@@ -1,0 +1,310 @@
+{% extends("_base") %}
+
+{% block title %}首页 - Warp Exchange{% endblock %}
+
+{% block style %}
+<style>
+.portal-home {
+	background: radial-gradient(1000px 380px at 28% -10%, rgba(80, 141, 255, .16), rgba(18, 26, 39, 0));
+}
+.portal-home .num { font-variant-numeric: tabular-nums; }
+.portal-home .up { color: #ff7f7f; }
+.portal-home .down { color: #66e89a; }
+.portal-home .hero {
+	background: linear-gradient(135deg, #1f2b3d, #2d3f5c);
+	color: #fff;
+	border-radius: 12px;
+	padding: 14px 16px;
+	margin-bottom: 10px;
+	box-shadow: 0 6px 20px rgba(18, 22, 30, .22);
+}
+.portal-home .hero .title {
+	font-size: 1.02rem;
+	font-weight: 700;
+}
+.portal-home .hero .sub {
+	font-size: .9rem;
+	opacity: .88;
+}
+.portal-home .market-grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 10px;
+}
+.portal-home .market-item {
+	background: #172233;
+	border: 1px solid #2b3b55;
+	border-radius: 10px;
+	padding: 11px 12px;
+	box-shadow: 0 8px 20px rgba(5, 10, 20, .22);
+	transition: transform .16s ease, box-shadow .16s ease;
+}
+.portal-home .market-item:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 10px 22px rgba(5, 10, 20, .35);
+	border-color: #3f5375;
+}
+.portal-home .market-item .name { color: #bfd0e3; font-size: .86rem; }
+.portal-home .market-item .last { font-size: 1.15rem; font-weight: 700; }
+.portal-home a.market-item {
+	color: inherit;
+	text-decoration: none;
+	display: block;
+}
+.portal-home .panel {
+	border: 1px solid #2a3952;
+	border-radius: 10px;
+	box-shadow: 0 10px 24px rgba(4, 10, 19, .25);
+	background: #152132;
+	margin-bottom: 10px;
+}
+.portal-home .panel-head {
+	padding: .56rem .75rem;
+	font-size: .9rem;
+	font-weight: 700;
+	border-bottom: 1px solid #2c3c56;
+	background: linear-gradient(180deg, #223048, #1b283b);
+}
+.portal-home .panel-body { padding: .65rem .75rem; }
+.portal-home .list-table th,
+.portal-home .list-table td {
+	font-size: .9rem;
+	padding-top: .42rem;
+	padding-bottom: .42rem;
+}
+.portal-home .brief-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 8px;
+}
+.portal-home .brief-card {
+	border: 1px solid #2a3b55;
+	border-radius: 8px;
+	background: #18253a;
+	padding: 9px 10px;
+	transition: border-color .15s ease, transform .15s ease;
+}
+.portal-home .brief-card .tag {
+	font-size: .82rem;
+	color: #b7c9de;
+}
+.portal-home .brief-card .title {
+	font-size: .92rem;
+	font-weight: 600;
+	margin-top: 2px;
+	line-height: 1.35;
+}
+.portal-home .scroll-box {
+	max-height: 250px;
+	overflow-y: auto;
+}
+.portal-home .brief-card:hover {
+	border-color: #436290;
+	transform: translateY(-1px);
+}
+.portal-home .news-item .meta {
+	font-size: .82rem;
+	color: #b7c9de;
+}
+.portal-home .news-item .title {
+	font-size: .92rem;
+	line-height: 1.5;
+}
+.portal-home .news-item:hover {
+	background: rgba(79, 140, 255, .08);
+}
+.portal-home .border-bottom {
+	border-bottom: 1px solid #27374f !important;
+}
+@media (max-width: 991.98px) {
+	.portal-home .market-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.portal-home .brief-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+@media (max-width: 575.98px) {
+	.portal-home .brief-grid {
+		grid-template-columns: repeat(1, minmax(0, 1fr));
+	}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="portal-home py-2 py-md-3">
+	<div class="hero">
+		<div class="title"><i class="bi bi-stars me-1"></i>Warp 市场中心</div>
+		<div class="sub mt-1">实时追踪热点、资金与快讯，打造高信息密度交易前首页。</div>
+	</div>
+
+	<div class="market-grid mb-2">
+		{% for item in marketOverview %}
+		{% if __profile__ != null %}
+		<a href="/trade" class="market-item">
+			<div class="name">{{ item.name }}</div>
+			<div class="last num">{{ item.last }}</div>
+			<div class="small num {{ item.trendClass }}">{{ item.change }}</div>
+		</a>
+		{% else %}
+		<div class="market-item">
+			<div class="name">{{ item.name }}</div>
+			<div class="last num">{{ item.last }}</div>
+			<div class="small num {{ item.trendClass }}">{{ item.change }}</div>
+		</div>
+		{% endif %}
+		{% endfor %}
+	</div>
+
+	<div class="row g-2">
+		<div class="col-lg-8">
+			<div class="panel">
+				<div class="panel-head"><i class="bi bi-grid-1x2-fill me-1"></i>热门板块</div>
+				<div class="panel-body">
+					<table class="table table-sm list-table mb-0">
+						<thead>
+							<tr>
+								<th>板块</th>
+								<th class="text-end">热度</th>
+								<th class="text-end">领涨标的</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for row in hotSectors %}
+							<tr>
+								<td>{{ row.name }}</td>
+								<td class="text-end num">{{ row.heat }}</td>
+								<td class="text-end">{{ row.lead }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-head"><i class="bi bi-cash-stack me-1"></i>资金流向</div>
+				<div class="panel-body">
+					<div class="row g-2">
+						{% for row in fundFlow %}
+						<div class="col-md-6">
+							<div class="border rounded p-2 bg-light">
+								<div class="small text-muted">{{ row.name }}</div>
+								<div class="num fw-bold {{ row.trendClass }}">{{ row.value }}</div>
+							</div>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-head"><i class="bi bi-bar-chart-line-fill me-1"></i>个股排行</div>
+				<div class="panel-body">
+					<table class="table table-sm list-table mb-0">
+						<thead>
+							<tr>
+								<th>代码</th>
+								<th class="text-end">最新价</th>
+								<th class="text-end">涨跌幅</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for row in rankings %}
+							<tr>
+								<td>{{ row.symbol }}</td>
+								<td class="text-end num">{{ row.price }}</td>
+								<td class="text-end num {{ row.trendClass }}">{{ row.change }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-head d-flex justify-content-between align-items-center">
+					<span><i class="bi bi-newspaper me-1"></i>要闻精选</span>
+					<a href="#0" class="small text-decoration-none text-muted">更多</a>
+				</div>
+				<div class="panel-body">
+					<div class="brief-grid">
+						{% for row in headlineNews %}
+						<a class="brief-card text-decoration-none text-reset d-block searchable-news"
+							data-search-text="{{ row.title }} {{ row.source }} {{ row.tag }} {{ row.time }}"
+							href="/news/{{ row.id }}">
+							<div class="tag">{{ row.tag }} · {{ row.source }}</div>
+							<div class="title">{{ row.title }}</div>
+							<div class="small text-muted mt-1 num">{{ row.time }}</div>
+						</a>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-head d-flex justify-content-between align-items-center">
+					<span><i class="bi bi-journal-text me-1"></i>市场解读</span>
+					<a href="#0" class="small text-decoration-none text-muted">更多</a>
+				</div>
+				<div class="panel-body scroll-box">
+					{% for row in analysisNews %}
+					<a class="news-item border-bottom py-2 d-block text-decoration-none text-reset searchable-news"
+						data-search-text="{{ row.title }} {{ row.source }} {{ row.tag }} {{ row.time }}" href="/news/{{ row.id }}">
+						<div class="meta">{{ row.tag }} · {{ row.source }} · <span class="num">{{ row.time }}</span></div>
+						<div class="title mt-1">{{ row.title }}</div>
+					</a>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+
+		<div class="col-lg-4">
+			<div class="panel">
+				<div class="panel-head d-flex justify-content-between align-items-center">
+					<span><i class="bi bi-lightning-charge-fill me-1"></i>资讯快讯</span>
+					<a href="#0" class="small text-decoration-none text-muted">更多</a>
+				</div>
+				<div class="panel-body scroll-box">
+					{% for n in flashNews %}
+					<a class="news-item border-bottom py-2 d-block text-decoration-none text-reset searchable-news"
+						data-search-text="{{ n.title }} {{ n.source }} {{ n.tag }} {{ n.time }}" href="/news/{{ n.id }}">
+						<div class="meta">{{ n.source }} · <span class="num">{{ n.time }}</span></div>
+						<div class="title mt-1">{{ n.title }}</div>
+					</a>
+					{% endfor %}
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-head"><i class="bi bi-megaphone-fill me-1"></i>政策观察</div>
+				<div class="panel-body scroll-box">
+					{% for row in policyWatch %}
+					<a class="news-item border-bottom py-2 d-block text-decoration-none text-reset searchable-news"
+						data-search-text="{{ row.title }} {{ row.source }} {{ row.tag }} {{ row.time }}" href="/news/{{ row.id }}">
+						<div class="meta">{{ row.source }} · <span class="num">{{ row.time }}</span></div>
+						<div class="title mt-1">{{ row.title }}</div>
+					</a>
+					{% endfor %}
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-head"><i class="bi bi-calendar-week-fill me-1"></i>财经日历</div>
+				<div class="panel-body scroll-box">
+					{% for c in calendar %}
+					<div class="news-item border-bottom py-2">
+						<div class="d-flex justify-content-between">
+							<span class="meta num">{{ c.time }}</span>
+							<span class="badge bg-secondary">{{ c.level }}</span>
+						</div>
+						<div class="title mt-1">{{ c.event }}</div>
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -12,9 +12,25 @@ import com.itranswarp.exchange.model.trade.OrderEntity;
 
 import java.util.TreeMap;
 
+/**
+ * 订单簿
+ * 
+ * 存储订单的容器
+ * 
+ * 使用TreeMap存储订单，保证订单按照价格和时间排序
+ * 
+ * 使用OrderKey作为TreeMap的键，保证订单按照价格和时间排序
+ */
 public class OrderBook {
 
+    /**
+     * 方向
+     */
     public final Direction direction;
+
+    /**
+     * 红黑树
+     */
     public final TreeMap<OrderKey, OrderEntity> book;
 
     public OrderBook(Direction direction) {

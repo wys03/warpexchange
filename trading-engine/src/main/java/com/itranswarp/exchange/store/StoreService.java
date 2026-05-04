@@ -14,6 +14,9 @@ import com.itranswarp.exchange.model.support.EntitySupport;
 import com.itranswarp.exchange.model.trade.EventEntity;
 import com.itranswarp.exchange.support.LoggerSupport;
 
+/**
+ * 存储服务
+ */
 @Component
 @Transactional
 public class StoreService extends LoggerSupport {

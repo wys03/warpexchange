@@ -1,0 +1,154 @@
+{% extends("_base") %}
+
+{% block title %}资金 - Warp Exchange{% endblock %}
+
+{% block style %}
+<style>
+.wallet-page .hint {
+    color: #bfd1e5;
+    font-size: .92rem;
+}
+.wallet-page .amount {
+    font-size: 1.65rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.wallet-page .balance-card {
+    border: 1px solid #2f4261;
+    background: linear-gradient(135deg, #1f2d44, #1b2739);
+}
+.wallet-page .op-card {
+    border: 1px solid #2a3b56;
+}
+.wallet-page .risk-note {
+    border: 1px solid rgba(245, 158, 11, .35);
+    background: rgba(245, 158, 11, .12);
+    color: #ffd48a;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-top: 12px;
+    font-size: .9rem;
+}
+.wallet-page .form-label {
+    color: #c7d8ea;
+    font-size: .9rem;
+    margin-bottom: .35rem;
+}
+@media (max-width: 767.98px) {
+    .wallet-page .amount {
+        font-size: 1.45rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block script %}
+<script>
+$(function () {
+    new Vue({
+        el: '#walletApp',
+        data: {
+            balances: {},
+            loading: false,
+            form: {
+                asset: 'USD',
+                amount: ''
+            }
+        },
+        computed: {
+            usdAvailable: function () {
+                var usd = this.balances.USD || {};
+                return typeof usd.available === 'number' ? usd.available.toFixed(2) : '0.00';
+            },
+            usdFrozen: function () {
+                var usd = this.balances.USD || {};
+                return typeof usd.frozen === 'number' ? usd.frozen.toFixed(2) : '0.00';
+            }
+        },
+        methods: {
+            reloadAssets: async function () {
+                var data = await $.get('/api/assets');
+                this.balances = data || {};
+            },
+            walletOp: async function (path) {
+                var amount = Number(this.form.amount);
+                if (!isFinite(amount) || amount <= 0) {
+                    showError('请输入大于 0 的金额');
+                    return;
+                }
+                if (this.form.asset !== 'USD') {
+                    showError('仅支持 USD 充值/提现');
+                    return;
+                }
+                this.loading = true;
+                try {
+                    await $.ajax({
+                        type: 'POST',
+                        url: '/api/wallet/' + path,
+                        data: JSON.stringify({
+                            asset: 'USD',
+                            amount: amount.toFixed(2)
+                        }),
+                        contentType: 'application/json'
+                    });
+                    this.form.amount = '';
+                    await this.reloadAssets();
+                    showInfo(path === 'deposit' ? 'USD 充值请求已提交' : 'USD 提现请求已提交');
+                } finally {
+                    this.loading = false;
+                }
+            }
+        },
+        mounted: function () {
+            this.reloadAssets();
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="wallet-page py-3" id="walletApp">
+    <div class="card mb-3 balance-card">
+        <div class="card-header"><i class="bi bi-wallet2 me-1"></i>USD 资金概览</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="small text-muted">可用余额</div>
+                    <div class="amount text-success">$<span v-text="usdAvailable"></span></div>
+                </div>
+                <div class="col-md-6">
+                    <div class="small text-muted">冻结余额</div>
+                    <div class="amount text-secondary">$<span v-text="usdFrozen"></span></div>
+                </div>
+            </div>
+            <div class="hint mt-2">说明：当前资金通道仅支持 USD，BTC 不允许充值和提现。</div>
+        </div>
+    </div>
+
+    <div class="card op-card">
+        <div class="card-header"><i class="bi bi-cash-stack me-1"></i>USD 充值 / 提现</div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">资产</label>
+                    <select class="form-select" v-model="form.asset">
+                        <option value="USD">USD</option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">金额</label>
+                    <input class="form-control" type="number" min="0.01" step="0.01" v-model="form.amount" placeholder="请输入 USD 金额">
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button class="btn btn-success flex-fill" :disabled="loading" @click="walletOp('deposit')">充值 USD</button>
+                    <button class="btn btn-outline-danger flex-fill" :disabled="loading" @click="walletOp('withdraw')">提现 USD</button>
+                </div>
+            </div>
+            <div class="risk-note">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>提现提交后将立即扣减可用余额，请确认金额与方向。
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

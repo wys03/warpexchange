@@ -9,6 +9,11 @@ import com.itranswarp.exchange.enums.Direction;
 import com.itranswarp.exchange.enums.OrderStatus;
 import com.itranswarp.exchange.model.trade.OrderEntity;
 
+/**
+ * 撮合引擎
+ *
+ * 订单簿 + 撮合（processOrder / cancel）
+ */
 @Component
 public class MatchEngine {
 
@@ -84,6 +89,11 @@ public class MatchEngine {
         return matchResult;
     }
 
+    /**
+     * 取消订单
+     * @param ts    更新时间
+     * @param order 订单实体
+     */
     public void cancel(long ts, OrderEntity order) {
         OrderBook book = order.direction == Direction.BUY ? this.buyBook : this.sellBook;
         if (!book.remove(order)) {

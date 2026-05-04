@@ -6,9 +6,18 @@ import java.util.List;
 
 import com.itranswarp.exchange.model.trade.OrderEntity;
 
+/**
+ * 成交结果
+ */
 public class MatchResult {
 
+    /**
+     * 买方订单
+     */
     public final OrderEntity takerOrder;
+    /**
+     * 成交详情列表
+     */
     public final List<MatchDetailRecord> matchDetails = new ArrayList<>();
 
     public MatchResult(OrderEntity takerOrder) {

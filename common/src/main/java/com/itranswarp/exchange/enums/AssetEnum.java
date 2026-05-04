@@ -1,5 +1,8 @@
 package com.itranswarp.exchange.enums;
 
+/**
+ * 资产枚举
+ */
 public enum AssetEnum {
 
     BTC,

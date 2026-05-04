@@ -42,3 +42,51 @@ WarpExchange是一个基于Spring Boot的交易系统，包含交易引擎、API
 - 可以到这个博主这里下载有视频教程：https://github.com/wys03/DockerTarBuilder
 <img width="1912" height="1076" alt="image" src="https://github.com/user-attachments/assets/fb4774fa-d8d6-40eb-9b2c-a3109095ff63" />
 
+
+项目架构
+该项目包含 7 个微服务：
+
+服务	端口	描述
+ui	8000	前端用户界面
+trading-api	8001	交易 API
+trading-engine	8002	交易引擎
+trading-sequencer	8003	交易序列器
+quotation	8004	报价服务
+push	8005	推送服务
+config	8888	Spring Cloud 配置中心
+启动步骤
+第一步：启动依赖的基础服务（Docker）
+bash
+cd e:/warpexchange/build
+docker-compose up -d
+这将启动：
+
+MySQL 8.0 (端口 3306)
+Redis 6.2 (端口 6379)
+Kafka 7.4.0 (端口 9092)
+Zookeeper (端口 2181)
+注意：首次启动会自动执行 build/sql/schema.sql 初始化数据库。
+
+第二步：构建项目
+bash
+cd e:/warpexchange/build
+mvn clean package -DskipTests
+第三步：启动各个微服务
+
+模块	Main Class	端口
+config	com.itranswarp.warpconfig.WarpConfigApplication	8888
+trading-sequencer	com.itranswarp.sequencer.TradingSequencerApplication	8003
+trading-engine	com.itranswarp.engine.TradingEngineApplication	8002
+trading-api	com.itranswarp.exchange.TradingApiApplication	8001
+quotation	com.itranswarp.quotation.QuotationApplication	8004
+push	com.itranswarp.push.PushApplication	8005
+ui	com.itranswarp.ui.UIApplication	8000
+
+环境要求
+Java 17
+Maven 3.6+
+Docker (用于运行 MySQL, Redis, Kafka 等)
+访问地址
+UI 界面：http://localhost:8000
+API 文档：http://localhost:8001/swagger-ui.html
+

@@ -4,10 +4,19 @@ import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * 资产
+ */
 public class Asset {
 
+    /**
+     * 可用
+     */
     BigDecimal available;
 
+    /**
+     * 冻结
+     */
     BigDecimal frozen;
 
     public Asset() {
@@ -27,6 +36,10 @@ public class Asset {
         return frozen;
     }
 
+    /**
+     * 总额   = 可用 + 冻结
+     * @return
+     */
     @JsonIgnore
     public BigDecimal getTotal() {
         return available.add(frozen);

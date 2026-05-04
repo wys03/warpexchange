@@ -54,6 +54,9 @@ import com.itranswarp.exchange.support.LoggerSupport;
 import com.itranswarp.exchange.util.IpUtil;
 import com.itranswarp.exchange.util.JsonUtil;
 
+/**
+ * 交易引擎服务
+ */
 @Component
 public class TradingEngineService extends LoggerSupport {
 
@@ -93,6 +96,9 @@ public class TradingEngineService extends LoggerSupport {
 
     private MessageProducer<TickMessage> producer;
 
+    /**
+     * 最后一个事件序列号
+     */
     private long lastSequenceId = 0;
 
     private boolean orderBookChanged = false;
@@ -112,9 +118,22 @@ public class TradingEngineService extends LoggerSupport {
     private Queue<ApiResultMessage> apiResultQueue = new ConcurrentLinkedQueue<>();
     private Queue<NotificationMessage> notificationQueue = new ConcurrentLinkedQueue<>();
 
+    /**
+     * 是否处于冷启动重放阶段：仅恢复内存状态，不产生对外副作用。
+     */
+    private volatile boolean replaying = false;
+
+    /**
+     * 要点：
+     *
+     * 消费者：批量监听 TRADE，回调 processMessages（在 Kafka 客户端线程里执行，顺序由分区与消费者保证；业务上仍靠 sequenceId 链校验）。
+     * 生产者：把 TickMessage 发到 TICK，给行情服务用。
+     * 五条后台线程：Tick 批量发送、通知发 Redis、API 异步结果发 Redis、订单簿写 Redis、订单/成交批量写库。这样 事件处理路径 不必等 IO 完成，只把活丢进队列。
+     */
     @PostConstruct
     public void init() {
         this.shaUpdateOrderBookLua = this.redisService.loadScriptFromClassPath("/redis/update-orderbook.lua");
+        recoverStateFromStore();
         this.consumer = this.messagingFactory.createBatchMessageListener(Messaging.Topic.TRADE, IpUtil.getHostId(),
                 this::processMessages);
         this.producer = this.messagingFactory.createMessageProducer(Topic.TICK, TickMessage.class);
@@ -130,6 +149,44 @@ public class TradingEngineService extends LoggerSupport {
         this.dbThread.start();
     }
 
+    /**
+     * 冷启动时从事件库恢复引擎状态（资产/订单/撮合簿）。
+     * 仅重建内存状态，不重复推送通知或重复写库。
+     */
+    private void recoverStateFromStore() {
+        logger.info("start recover trading-engine state from db events...");
+        long recoveredEvents = 0;
+        this.replaying = true;
+        try {
+            for (;;) {
+                List<AbstractEvent> events = this.storeService.loadEventsFromDb(this.lastSequenceId);
+                if (events.isEmpty()) {
+                    break;
+                }
+                for (AbstractEvent event : events) {
+                    this.processEvent(event);
+                    recoveredEvents++;
+                }
+                // StoreService 单批最多 100000；小于上限说明已经到末尾。
+                if (events.size() < 100000) {
+                    break;
+                }
+            }
+            this.latestOrderBook = this.matchEngine.getOrderBook(this.orderBookDepth);
+            this.orderBookChanged = false;
+            logger.info("recover trading-engine state completed, recovered events: {}, last sequence id: {}.",
+                    Long.valueOf(recoveredEvents), Long.valueOf(this.lastSequenceId));
+        } finally {
+            this.replaying = false;
+            // 保险清理：重放阶段不应产生外发消息或落库任务。
+            this.orderQueue.clear();
+            this.matchQueue.clear();
+            this.tickQueue.clear();
+            this.apiResultQueue.clear();
+            this.notificationQueue.clear();
+        }
+    }
+
     @PreDestroy
     public void destroy() {
         this.consumer.stop();
@@ -137,6 +194,9 @@ public class TradingEngineService extends LoggerSupport {
         this.dbThread.interrupt();
     }
 
+    /**
+     * 定时将TickMessage发送到TICK主题
+     */
     private void runTickThread() {
         logger.info("start tick thread...");
         for (;;) {
@@ -169,6 +229,9 @@ public class TradingEngineService extends LoggerSupport {
         }
     }
 
+    /**
+     * 定时将NotificationMessage发送到NOTIFICATION主题
+     */
     private void runNotifyThread() {
         logger.info("start publish notify to redis...");
         for (;;) {
@@ -187,6 +250,9 @@ public class TradingEngineService extends LoggerSupport {
         }
     }
 
+    /**
+     * 定时将ApiResultMessage发送到TRADING_API_RESULT主题
+     */
     private void runApiResultThread() {
         logger.info("start publish api result to redis...");
         for (;;) {
@@ -205,6 +271,9 @@ public class TradingEngineService extends LoggerSupport {
         }
     }
 
+    /**
+     * 定时将OrderBookBean发送到ORDER_BOOK主题
+     */
     private void runOrderBookThread() {
         logger.info("start update orderbook snapshot to redis...");
         long lastSequenceId = 0;
@@ -234,6 +303,9 @@ public class TradingEngineService extends LoggerSupport {
         }
     }
 
+    /**
+     * 定时将MatchDetailEntity和OrderEntity批量写入数据库
+     */
     private void runDbThread() {
         logger.info("start batch insert to db...");
         for (;;) {
@@ -246,7 +318,9 @@ public class TradingEngineService extends LoggerSupport {
         }
     }
 
-    // called by dbExecutor thread only:
+    /**
+     * 将MatchDetailEntity和OrderEntity批量写入数据库
+     */
     private void saveToDb() throws InterruptedException {
         if (!matchQueue.isEmpty()) {
             List<MatchDetailEntity> batch = new ArrayList<>(1000);
@@ -291,6 +365,10 @@ public class TradingEngineService extends LoggerSupport {
         }
     }
 
+    /**
+     * 事件入口
+     * @param messages  事件列表
+     */
     public void processMessages(List<AbstractEvent> messages) {
         this.orderBookChanged = false;
         for (AbstractEvent message : messages) {
@@ -302,6 +380,11 @@ public class TradingEngineService extends LoggerSupport {
         }
     }
 
+    /**
+     *  processEvent 里先做 序号一致性（重复跳过、缺口从 DB 补、链断了 panic），再按类型分发：
+     *  这里要建立的直觉：引擎状态 = 严格按 sequenceId 顺序应用事件的结果；乱序或丢事件会触发从 DB 补链或进程退出，避免静默错账。
+     * @param event
+     */
     public void processEvent(AbstractEvent event) {
         if (this.fatalError) {
             return;
@@ -366,12 +449,21 @@ public class TradingEngineService extends LoggerSupport {
         System.exit(1);
     }
 
+    /**
+     * 转账操作
+     * @param event
+     * @return 是否转账成功
+     */
     boolean transfer(TransferEvent event) {
         boolean ok = this.assetService.tryTransfer(Transfer.AVAILABLE_TO_AVAILABLE, event.fromUserId, event.toUserId,
                 event.asset, event.amount, event.sufficient);
         return ok;
     }
 
+    /**
+     * 创建订单
+     * @param event
+     */
     void createOrder(OrderRequestEvent event) {
         ZonedDateTime zdt = Instant.ofEpochMilli(event.createdAt).atZone(zoneId);
         int year = zdt.getYear();
@@ -382,13 +474,17 @@ public class TradingEngineService extends LoggerSupport {
         if (order == null) {
             logger.warn("create order failed.");
             // 推送失败结果:
-            this.apiResultQueue.add(ApiResultMessage.createOrderFailed(event.refId, event.createdAt));
+            if (!this.replaying) {
+                this.apiResultQueue.add(ApiResultMessage.createOrderFailed(event.refId, event.createdAt));
+            }
             return;
         }
         MatchResult result = this.matchEngine.processOrder(event.sequenceId, order);
         this.clearingService.clearMatchResult(result);
         // 推送成功结果,注意必须复制一份OrderEntity,因为将异步序列化:
-        this.apiResultQueue.add(ApiResultMessage.orderSuccess(event.refId, order.copy(), event.createdAt));
+        if (!this.replaying) {
+            this.apiResultQueue.add(ApiResultMessage.orderSuccess(event.refId, order.copy(), event.createdAt));
+        }
         this.orderBookChanged = true;
         // 收集Notification:
         List<NotificationMessage> notifications = new ArrayList<>();
@@ -423,17 +519,19 @@ public class TradingEngineService extends LoggerSupport {
                 tick.createdAt = event.createdAt;
                 ticks.add(tick);
             }
-            // 异步写入数据库:
-            this.orderQueue.add(closedOrders);
-            this.matchQueue.add(matchDetails);
-            // 异步发送Tick消息:
-            TickMessage msg = new TickMessage();
-            msg.sequenceId = event.sequenceId;
-            msg.createdAt = event.createdAt;
-            msg.ticks = ticks;
-            this.tickQueue.add(msg);
-            // 异步通知OrderMatch:
-            this.notificationQueue.addAll(notifications);
+            if (!this.replaying) {
+                // 异步写入数据库:
+                this.orderQueue.add(closedOrders);
+                this.matchQueue.add(matchDetails);
+                // 异步发送Tick消息:
+                TickMessage msg = new TickMessage();
+                msg.sequenceId = event.sequenceId;
+                msg.createdAt = event.createdAt;
+                msg.ticks = ticks;
+                this.tickQueue.add(msg);
+                // 异步通知OrderMatch:
+                this.notificationQueue.addAll(notifications);
+            }
         }
     }
 
@@ -462,20 +560,28 @@ public class TradingEngineService extends LoggerSupport {
         return d;
     }
 
+    /**
+     * 取消订单
+     * @param event
+     */
     void cancelOrder(OrderCancelEvent event) {
         OrderEntity order = this.orderService.getOrder(event.refOrderId);
         // 未找到活动订单或订单不属于该用户:
         if (order == null || order.userId.longValue() != event.userId.longValue()) {
             // 发送失败消息:
-            this.apiResultQueue.add(ApiResultMessage.cancelOrderFailed(event.refId, event.createdAt));
+            if (!this.replaying) {
+                this.apiResultQueue.add(ApiResultMessage.cancelOrderFailed(event.refId, event.createdAt));
+            }
             return;
         }
         this.matchEngine.cancel(event.createdAt, order);
         this.clearingService.clearCancelOrder(order);
         this.orderBookChanged = true;
         // 发送成功消息:
-        this.apiResultQueue.add(ApiResultMessage.orderSuccess(event.refId, order, event.createdAt));
-        this.notificationQueue.add(createNotification(event.createdAt, "order_canceled", order.userId, order));
+        if (!this.replaying) {
+            this.apiResultQueue.add(ApiResultMessage.orderSuccess(event.refId, order, event.createdAt));
+            this.notificationQueue.add(createNotification(event.createdAt, "order_canceled", order.userId, order));
+        }
     }
 
     public void debug() {

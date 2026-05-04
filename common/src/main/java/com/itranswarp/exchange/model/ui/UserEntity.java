@@ -10,12 +10,14 @@ import jakarta.persistence.Table;
 import com.itranswarp.exchange.enums.UserType;
 import com.itranswarp.exchange.model.support.EntitySupport;
 
+
 @Entity
 @Table(name = "users")
 public class UserEntity implements EntitySupport {
 
     /**
      * Primary key: auto-increment long.
+     *
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

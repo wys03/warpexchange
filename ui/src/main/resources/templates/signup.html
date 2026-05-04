@@ -1,47 +1,116 @@
 {% extends("_base") %}
 
+{% block style %}
+<style>
+.signin-page {
+	min-height: calc(100vh - 118px);
+	display: flex;
+	align-items: center;
+	padding-top: 0.5rem;
+	padding-bottom: 2rem;
+}
+.auth-card {
+	border: none;
+	border-radius: 1rem;
+	box-shadow: 0 0.5rem 2rem rgba(15, 34, 58, 0.08);
+	overflow: hidden;
+}
+.auth-card .card-header {
+	background: linear-gradient(135deg, #f4fbf7 0%, #ffffff 100%);
+	border-bottom: 1px solid rgba(25, 135, 84, 0.12);
+	padding: 1rem 1.25rem 0;
+}
+.auth-card .nav-tabs .nav-link {
+	color: #6c757d;
+	border: none;
+	border-radius: 0;
+	padding: 0.75rem 1rem;
+	margin-bottom: -1px;
+}
+.auth-card .nav-tabs .nav-link:hover {
+	color: #198754;
+	border-color: transparent;
+}
+.auth-card .nav-tabs .nav-link.active {
+	color: #198754;
+	background: transparent;
+	border-bottom: 3px solid #198754;
+	font-weight: 600;
+}
+.auth-card .card-body {
+	padding: 1.75rem 1.5rem 1.5rem;
+}
+.auth-headline {
+	font-size: 1.15rem;
+	font-weight: 600;
+	color: #212529;
+}
+.auth-card .input-group-text {
+	background: #f8f9fa;
+	color: #6c757d;
+	border-color: #dee2e6;
+}
+.auth-card .btn-success {
+	padding: 0.65rem;
+	font-weight: 600;
+	border-radius: 0.5rem;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-	<div class="col-sm-12 col-md-6 col-lg-7">
-		{% include("_inc_highlights") %}
-	</div>
-	<div class="col-sm-12 col-md-6 col-lg-5">
-		<div class="card mt-2 mb-2">
-			<div class="card-header">
-				<ul class="nav nav-tabs card-header-tabs">
-					<li class="nav-item">
-						<a class="nav-link" href="/signin">Sign In</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link active" href="#0">Sign Up</a>
-					</li>
-				</ul>
-			</div>
-			<div class="card-body">
-				<form action="/signup" method="post">
-					{% if error %}
-					<div class="mb-3">
-						<div class="alert alert-danger">
-							{{ error }}
+<div class="signin-page">
+	<div class="row justify-content-center w-100 mx-0">
+		<div class="col-12 col-sm-11 col-md-7 col-lg-5 col-xl-4">
+			<div class="card auth-card">
+				<div class="card-header">
+					<ul class="nav nav-tabs card-header-tabs border-0">
+						<li class="nav-item">
+							<a class="nav-link" href="/signin">登录</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link active" href="#0">注册</a>
+						</li>
+					</ul>
+				</div>
+				<div class="card-body">
+					<p class="auth-headline text-center mb-1">
+						<i class="bi bi-person-plus text-success me-2"></i>创建账号
+					</p>
+					<p class="text-muted small text-center mb-4">填写信息加入 Warp Exchange</p>
+					<form action="/signup" method="post">
+						{% if error %}
+						<div class="alert alert-danger py-2 d-flex align-items-center mb-3" role="alert">
+							<i class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0"></i>
+							<span>{{ error }}</span>
 						</div>
-					</div>
-					{% endif %}
-					<div class="mb-3">
-						<label for="inputEmail" class="form-label">Email:</label>
-						<input id="inputEmail" name="email" class="form-control" placeholder="name@example.com" value="{{ email }}">
-					</div>
-					<div class="mb-3">
-						<label for="inputName" class="form-label">Name:</label>
-						<input id="inputName" name="name" class="form-control" placeholder="Name" value="{{ name }}">
-					</div>
-					<div class="mb-3">
-						<label for="inputPassword" class="form-label">Password:</label>
-						<input id="inputPassword" name="password" type="password" class="form-control" placeholder="Password">
-					</div>
-					<div class="mb-2">
-						<button type="submit" class="btn btn-success w-100">Sign Up</button>
-					</div>
-				</form>
+						{% endif %}
+						<div class="mb-3">
+							<label for="inputEmail" class="form-label small text-muted mb-1">邮箱</label>
+							<div class="input-group">
+								<span class="input-group-text"><i class="bi bi-envelope"></i></span>
+								<input id="inputEmail" name="email" type="email" class="form-control" placeholder="you@example.com" value="{{ email }}" autocomplete="email" autofocus>
+							</div>
+						</div>
+						<div class="mb-3">
+							<label for="inputName" class="form-label small text-muted mb-1">姓名</label>
+							<div class="input-group">
+								<span class="input-group-text"><i class="bi bi-person"></i></span>
+								<input id="inputName" name="name" type="text" class="form-control" placeholder="您的显示名称" value="{{ name }}" autocomplete="name">
+							</div>
+						</div>
+						<div class="mb-4">
+							<label for="inputPassword" class="form-label small text-muted mb-1">密码</label>
+							<div class="input-group">
+								<span class="input-group-text"><i class="bi bi-lock"></i></span>
+								<input id="inputPassword" name="password" type="password" class="form-control" placeholder="请设置登录密码" autocomplete="new-password">
+							</div>
+						</div>
+						<button type="submit" class="btn btn-success w-100">
+							<i class="bi bi-person-plus-fill me-1"></i>注册
+						</button>
+					</form>
+				</div>
 			</div>
 		</div>
 	</div>

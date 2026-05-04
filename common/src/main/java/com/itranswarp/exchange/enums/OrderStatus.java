@@ -1,7 +1,7 @@
 package com.itranswarp.exchange.enums;
 
 /**
- * Define order status constants.
+ * 订单状态
  */
 public enum OrderStatus {
 
@@ -30,6 +30,10 @@ public enum OrderStatus {
      */
     FULLY_CANCELLED(true);
 
+    /**
+     * 是否终态
+     * 终态订单会被送去 异步落库（TradingEngineService 里 closedOrders 等逻辑）
+     */
     public final boolean isFinalStatus;
 
     OrderStatus(boolean isFinalStatus) {

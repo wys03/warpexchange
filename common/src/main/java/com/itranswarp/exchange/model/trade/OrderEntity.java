@@ -16,43 +16,50 @@ import com.itranswarp.exchange.enums.OrderStatus;
 import com.itranswarp.exchange.model.support.EntitySupport;
 
 /**
- * Order entity.
+ * 订单实体类
  */
 @Entity
 @Table(name = "orders")
 public class OrderEntity implements EntitySupport, Comparable<OrderEntity> {
 
     /**
-     * Primary key: assigned order id.
+     * 订单唯一ID
      */
     @Id
     @Column(nullable = false, updatable = false)
     public Long id;
 
     /**
-     * event id (a.k.a sequenceId) that create this order. ASC only.
+     * 序列号（用于保证交易顺序）
      */
     @Column(nullable = false, updatable = false)
     public long sequenceId;
 
     /**
-     * Order direction.
+     * 买卖方向 (BUY/SELL)
      */
     @Column(nullable = false, updatable = false, length = VAR_ENUM)
     public Direction direction;
 
     /**
-     * User id of this order.
+     * 下单用户ID
      */
     @Column(nullable = false, updatable = false)
     public Long userId;
 
     /**
-     * Order status.
+     * 当前状态
+     * 反映当前成交情况
      */
     @Column(nullable = false, updatable = false, length = VAR_ENUM)
     public OrderStatus status;
 
+    /**
+     * 更新订单状态
+     * @param unfilledQuantity  未成交数量
+     * @param status            状态
+     * @param updatedAt         更新时间
+     */
     public void updateOrder(BigDecimal unfilledQuantity, OrderStatus status, long updatedAt) {
         this.version++;
         this.unfilledQuantity = unfilledQuantity;
@@ -62,25 +69,30 @@ public class OrderEntity implements EntitySupport, Comparable<OrderEntity> {
     }
 
     /**
-     * The limit-order price. MUST NOT change after insert.
+     * 限价（想成交的价格）
+     *  下单后不能修改
      */
     @Column(nullable = false, updatable = false, precision = PRECISION, scale = SCALE)
     public BigDecimal price;
 
     /**
-     * Created time (milliseconds).
+     * 创建时间
      */
     @Column(nullable = false, updatable = false)
     public long createdAt;
 
     /**
-     * Updated time (milliseconds).
+     * 更新时间
      */
     @Column(nullable = false, updatable = false)
     public long updatedAt;
 
     private int version;
 
+    /**
+     * 获取版本号
+     * @return
+     */
     @Transient
     @JsonIgnore
     public int getVersion() {
@@ -88,17 +100,23 @@ public class OrderEntity implements EntitySupport, Comparable<OrderEntity> {
     }
 
     /**
-     * The order quantity. MUST NOT change after insert.
+     * 原始数量
+     *  下单后不能修改
      */
     @Column(nullable = false, updatable = false, precision = PRECISION, scale = SCALE)
     public BigDecimal quantity;
 
     /**
-     * How much unfilled during match.
+     * 未成交数量
+     * 会随着成交逐渐减少
      */
     @Column(nullable = false, updatable = false, precision = PRECISION, scale = SCALE)
     public BigDecimal unfilledQuantity;
 
+    /**
+     * 复制订单
+     * @return
+     */
     @Nullable
     public OrderEntity copy() {
         OrderEntity entity = new OrderEntity();
@@ -120,6 +138,11 @@ public class OrderEntity implements EntitySupport, Comparable<OrderEntity> {
         return entity;
     }
 
+    /**
+     * 判断两个订单是否相等
+     * @param o
+     * @return
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -132,11 +155,19 @@ public class OrderEntity implements EntitySupport, Comparable<OrderEntity> {
         return false;
     }
 
+    /**
+     * 获取订单的hash值
+     * @return
+     */
     @Override
     public int hashCode() {
         return this.id.hashCode();
     }
 
+    /**
+     * 获取订单的字符串表示
+     * @return
+     */
     @Override
     public String toString() {
         return "OrderEntity [id=" + id + ", sequenceId=" + sequenceId + ", direction=" + direction + ", userId="

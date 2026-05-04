@@ -1,22 +1,22 @@
 package com.itranswarp.exchange.enums;
 
 /**
- * Clearing type constants.
+ * 清算类型
  */
 public enum ClearingType {
 
     /**
-     * Maker's clearing record.
+     * 挂单
      */
     MAKER,
 
     /**
-     * Taker's clearing record.
+     * 吃单
      */
     TAKER,
 
     /**
-     * A cancelled clearing record.
+     * 取消
      */
     CANCELLED;
 }

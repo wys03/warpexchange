@@ -6,3 +6,4 @@ server:
 pebble:
   prefix: /templates/
   suffix: .html
+  defaultEncoding: UTF-8

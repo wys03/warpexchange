@@ -3,3 +3,8 @@ spring:
     name: ui
   config:
     import: configserver:${CONFIG_SERVER:http://localhost:8888}
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
